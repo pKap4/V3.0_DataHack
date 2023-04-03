@@ -44,6 +44,8 @@ def create_model(df):
     # LSTM requies 3-dimensional input
     X_train =X_train.reshape(X_train.shape[0],X_train.shape[1] , 1)
     X_test = X_test.reshape(X_test.shape[0],X_test.shape[1] , 1)
+    actual = y_test
+    dates = X_test[0]
 
     # Model building
     tf.keras.backend.clear_session()
@@ -54,7 +56,7 @@ def create_model(df):
     model.add(Dense(1))
     optimizer = tf.keras.optimizers.Adam()
     model.compile(loss='mean_squared_error',optimizer=optimizer)
-    model.fit(X_train,y_train,validation_data=(X_test,y_test),epochs=10,batch_size=5,verbose=1)
+    model.fit(X_train,y_train,validation_data=(X_test,y_test),epochs=1,batch_size=5,verbose=1)
 
 
     # model.save('lstm_model.h5')
@@ -64,6 +66,7 @@ def create_model(df):
     ### Lets Do the prediction and check performance metrics
     train_predict=model.predict(X_train)
     test_predict=model.predict(X_test)
+    predicted = test_predict
 
     # Transform back to original form
     train_predict = scaler.inverse_transform(train_predict)
@@ -99,7 +102,7 @@ def create_model(df):
     lst_output=[]
     n_steps=time_step
     i=0
-    pred_days = 10
+    pred_days = 100
     while(i<pred_days):
         if(len(temp_input)>time_step):
             x_input=np.array(temp_input[1:])
@@ -124,4 +127,4 @@ def create_model(df):
     # print("Output of predicted next days: ",lst_output)
     next_predicted_days_value = scaler.inverse_transform(np.array(lst_output).reshape(-1,1)).reshape(1,-1).tolist()[0]
     # st.write(next_predicted_days_value)
-    return plotdf,pd.DataFrame(next_predicted_days_value)
+    return plotdf,pd.DataFrame(next_predicted_days_value),predicted,actual,dates
